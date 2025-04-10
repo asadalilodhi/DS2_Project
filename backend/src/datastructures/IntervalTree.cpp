@@ -54,3 +54,21 @@ std::string IntervalTree::congestionToString(CongestionLevel level) {
         default:                        return "UNKNOWN";
     }
 }
+
+
+void IntervalTree::printTree() const {
+    printTreeHelper(root);
+}
+
+void IntervalTree::printTreeHelper(const std::unique_ptr<Node>& node, int depth) const {
+    if (!node) return;
+
+    printTreeHelper(node->right, depth + 1);
+
+    std::cout << std::string(depth * 4, ' ') << "Interval: [" << node->interval.startTime << ", " 
+              << node->interval.endTime << "], MaxEnd: " << node->maxEnd 
+              << ", Road: " << node->interval.roadSegmentId << "\n";
+
+
+    printTreeHelper(node->left, depth + 1);
+}

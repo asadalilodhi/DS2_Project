@@ -12,6 +12,7 @@ int main() {
     for (const auto& interval : trafficData) {
         tree.insert(interval);
     }
+    tree.printTree();
 
     //------------------------------ Interval retreval --------------------------------------
 

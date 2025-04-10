@@ -17,12 +17,14 @@ private:
 
     void insertHelper(std::unique_ptr<Node>& node, const TrafficInterval& interval);
     void queryHelper(const Node* node, double start, double end, std::vector<TrafficInterval>& results) const;
+    void printTreeHelper(const std::unique_ptr<Node>& node, int depth = 0) const; 
     std::unique_ptr<Node> root;
 
 public:
     void insert(const TrafficInterval& interval);
     std::vector<TrafficInterval> queryOverlap(double start, double end) const;
     std::string congestionToString(CongestionLevel level);
+    void printTree() const;
     void clear();
 };
 
