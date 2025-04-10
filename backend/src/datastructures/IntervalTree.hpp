@@ -3,41 +3,33 @@
 
 #include <iostream>
 
+#pragma once
+#include <vector>
+#include <memory>
+#include "TrafficData.hpp" 
+
+
+
 class IntervalTree {
 private:
-    struct Interval {
-        int low;
-        int high;
-        Interval(int l = 0, int h = 0) : low(l), high(h) {}
-    };
 
     struct Node {
-        Interval interval;
-        int max;
-        Node* left;
-        Node* right;
-        Node(Interval i) : interval(i), max(i.high), left(nullptr), right(nullptr) {}
+        TrafficInterval interval;
+        double maxEnd;  // Max end time in subtree + used in comparisions
+        std::unique_ptr<Node> left, right;
+        Node(const TrafficInterval& i) 
+            : interval(i), maxEnd(i.endTime), left(nullptr), right(nullptr) {}
     };
-
-    Node* root;
-
-    // Helper functions
-    Node* insert(Node* node, Interval i);
-    bool doOverlap(Interval i1, Interval i2);
-    Node* search(Node* node, Interval i);
-    void inorderTraversal(Node* node);
-    void destroyTree(Node* node);
+    void insertHelper(std::unique_ptr<Node>& node, const TrafficInterval& interval);
+    void queryHelper(const Node* node, double start, double end, std::vector<TrafficInterval>& results) const ;
+    
+    std::unique_ptr<Node> root;
 
 public:
-    IntervalTree() : root(nullptr) {}
-    ~IntervalTree() {
-        destroyTree(root);
-    }
-
-    // Public interface
-    void insert(int low, int high);
-    bool search(int low, int high);
-    void printTree();
+    void insert(const TrafficInterval& interval);
+    std::vector<TrafficInterval> queryOverlap(double start, double end) const;
+    std::string congestionToString(CongestionLevel level);
+    void clear();
 };
 
 #endif // INTERVAL_TREE_HPP

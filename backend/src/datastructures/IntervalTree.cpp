@@ -1,92 +1,55 @@
 #include "IntervalTree.hpp"
 #include <algorithm>
+#include <iostream>
+#include <string>
 
-// Private helper function implementations
-IntervalTree::Node* IntervalTree::insert(Node* node, Interval i) {
-    if (node == nullptr) {
-        return new Node(i);
-    }
-
-    // Using low value as the key for BST
-    if (i.low < node->interval.low) {
-        node->left = insert(node->left, i);
+void IntervalTree::insertHelper(std::unique_ptr<Node>& node, const TrafficInterval& interval) {
+    if (!node) {
+        node = std::make_unique<Node>(interval);
+    } else if (interval.startTime < node->interval.startTime) {
+        insertHelper(node->left, interval);  // Recursive call
     } else {
-        node->right = insert(node->right, i);
+        insertHelper(node->right, interval);
     }
-
-    // Update the max value of this ancestor if needed
-    node->max = std::max(node->max, i.high);
-    return node;
+    node->maxEnd = std::max({node->interval.endTime,
+                            node->left ? node->left->maxEnd : 0,
+                            node->right ? node->right->maxEnd : 0});
 }
 
-bool IntervalTree::doOverlap(Interval i1, Interval i2) {
-    return (i1.low <= i2.high && i2.low <= i1.high);
+
+void IntervalTree::insert(const TrafficInterval& interval) {
+    insertHelper(root, interval);
 }
 
-IntervalTree::Node* IntervalTree::search(Node* node, Interval i) {
-    if (node == nullptr) {
-        return nullptr;
-    }
-
-    // If intervals overlap, return this node
-    if (doOverlap(node->interval, i)) {
-        return node;
-    }
-
-    // If left child exists and its max is greater than i's low,
-    // there may be an overlapping interval in the left subtree
-    if (node->left != nullptr && node->left->max >= i.low) {
-        return search(node->left, i);
-    }
-
-    // Otherwise, check the right subtree
-    return search(node->right, i);
+std::vector<TrafficInterval> IntervalTree::queryOverlap(double start, double end) const {
+    std::vector<TrafficInterval> results;
+    queryHelper(root.get(), start, end, results);
+    return results;
 }
 
-void IntervalTree::inorderTraversal(Node* node) {
-    if (node == nullptr) {
-        return;
+void IntervalTree::queryHelper(const Node* node, double start, double end, 
+                             std::vector<TrafficInterval>& results) const {
+    if (!node) return;
+    if (start <= node->interval.endTime && end >= node->interval.startTime) {
+        results.push_back(node->interval);
     }
-
-    inorderTraversal(node->left);
-    std::cout << "[" << node->interval.low << ", " 
-              << node->interval.high << "] max = " 
-              << node->max << std::endl;
-    inorderTraversal(node->right);
+    if (node->left && start <= node->left->maxEnd) {
+        queryHelper(node->left.get(), start, end, results);
+    }
+    if (node->right && start <= node->right->maxEnd) {
+        queryHelper(node->right.get(), start, end, results);
+    }
 }
 
-void IntervalTree::destroyTree(Node* node) {
-    if (node == nullptr) {
-        return;
-    }
+enum class CongestionLevel { FLUID = 0, LIGHT = 1, MODERATE = 2, HEAVY = 3, BLOCKED = 4 };
 
-    destroyTree(node->left);
-    destroyTree(node->right);
-    delete node;
-}
-
-// Public interface implementations
-void IntervalTree::insert(int low, int high) {
-    if (low > high) {
-        std::cout << "Invalid interval: low cannot be greater than high" << std::endl;
-        return;
+std::string IntervalTree::congestionToString(CongestionLevel level) {
+    switch (level) {
+        case CongestionLevel::FLUID:    return "FLUID";
+        case CongestionLevel::LIGHT:    return "LIGHT";
+        case CongestionLevel::MODERATE: return "MODERATE";
+        case CongestionLevel::HEAVY:    return "HEAVY";
+        case CongestionLevel::BLOCKED:  return "BLOCKED";
+        default:                        return "UNKNOWN";
     }
-    Interval i(low, high);
-    root = insert(root, i);
-}
-
-bool IntervalTree::search(int low, int high) {
-    if (low > high) {
-        return false;
-    }
-    Interval i(low, high);
-    return search(root, i) != nullptr;
-}
-
-void IntervalTree::printTree() {
-    if (root == nullptr) {
-        std::cout << "Tree is empty" << std::endl;
-        return;
-    }
-    inorderTraversal(root);
 }
