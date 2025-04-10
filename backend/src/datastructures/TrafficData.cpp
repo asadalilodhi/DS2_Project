@@ -30,3 +30,4 @@ std::vector<TrafficInterval> generateMockTrafficData() {
         {2100, 2330, static_cast<int>(CongestionLevel::BLOCKED),   "Hassan Square Road", true}
     };
 }
+
