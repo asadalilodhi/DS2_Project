@@ -16,7 +16,6 @@ void IntervalTree::insertHelper(std::unique_ptr<Node>& node, const TrafficInterv
                             node->right ? node->right->maxEnd : 0});
 }
 
-
 void IntervalTree::insert(const TrafficInterval& interval) {
     insertHelper(root, interval);
 }
@@ -36,12 +35,14 @@ void IntervalTree::queryHelper(const Node* node, double start, double end,
     if (node->left && start <= node->left->maxEnd) {
         queryHelper(node->left.get(), start, end, results);
     }
-    if (node->right && start <= node->right->maxEnd) {
+    if (node->right && end >= node->interval.startTime) {  // fixed condition
         queryHelper(node->right.get(), start, end, results);
     }
 }
 
-enum class CongestionLevel { FLUID = 0, LIGHT = 1, MODERATE = 2, HEAVY = 3, BLOCKED = 4 };
+void IntervalTree::clear() {
+    root.reset();  // Clear the whole tree
+}
 
 std::string IntervalTree::congestionToString(CongestionLevel level) {
     switch (level) {
