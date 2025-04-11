@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Event Traffic Prediction and Optimization</title>
+  <style>
+    /* Basic styling for layout and clarity */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 20px auto;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    form {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    label {
+      margin: 0 10px;
+      font-weight: bold;
+    }
+    input {
+      margin: 0 10px;
+      padding: 5px;
+      font-size: 1em;
+    }
+    button {
+      padding: 5px 15px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    #map {
+      width: 100%;
+      height: 500px;
+      border: 1px solid #ccc;
+      margin-bottom: 20px;
+    }
+    #congestionList {
+      list-style-type: none;
+      padding: 0;
+    }
+    #congestionList li {
+      background: #f8f8f8;
+      margin: 5px 0;
+      padding: 10px;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Event Traffic Prediction and Optimization</h1>
+    <form id="routeForm">
+      <label for="start">Start:</label>
+      <input type="text" id="start" name="start" placeholder="Enter start location" required>
+      <label for="end">Destination:</label>
+      <input type="text" id="end" name="end" placeholder="Enter destination" required>
+      <button type="submit">Find Optimal Route</button>
+    </form>
+    
+    <!-- Google Map display -->
+    <div id="map"></div>
+    
+    <h2>Congestion Intervals</h2>
+    <ul id="congestionList">
+      <!-- Congestion data will be dynamically inserted here -->
+    </ul>
+  </div>
+  
+  <script>
+    let map;
+    let directionsService;
+    let directionsRenderer;
+
+    // Initialize the Google Map and Directions services
+    function initMap() {
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: {lat: 24.8607, lng: 67.0011}, // Example: Karachi coordinates
+        zoom: 12
+      });
+      directionsService = new google.maps.DirectionsService();
+      directionsRenderer = new google.maps.DirectionsRenderer();
+      directionsRenderer.setMap(map);
+    }
+    
+    // Listen for the form submission and prevent the default behavior
+    document.getElementById("routeForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const start = document.getElementById("start").value;
+      const end = document.getElementById("end").value;
+      
+      // Call function to display directions on the map
+      calculateAndDisplayRoute(start, end);
+      
+      // Optionally update congestion intervals from the backend
+      fetchCongestionData();
+    });
+    
+    // Use the Directions Service to calculate and display the route
+    function calculateAndDisplayRoute(start, end) {
+      directionsService.route(
+        {
+          origin: start,
+          destination: end,
+          travelMode: google.maps.TravelMode.DRIVING
+        },
+        (response, status) => {
+          if (status === 'OK') {
+            directionsRenderer.setDirections(response);
+          } else {
+            window.alert('Directions request failed due to ' + status);
+          }
+        }
+      );
+    }
+    
+    // Example function to fetch congestion data from backend API
+    // This should be replaced with an actual API call
+    function fetchCongestionData() {
+      const congestionList = document.getElementById('congestionList');
+      congestionList.innerHTML = "";
+
+      // Sample data – replace with a fetch() or AJAX call to your backend API
+      const sampleData = [
+        {start: '08:00', end: '08:30', description: 'High congestion near Stadium'},
+        {start: '09:00', end: '09:15', description: 'Moderate congestion at Main Road'},
+      ];
+      
+      sampleData.forEach(interval => {
+        const li = document.createElement('li');
+        li.textContent = `${interval.start} - ${interval.end}: ${interval.description}`;
+        congestionList.appendChild(li);
+      });
+    }
+  </script>
+  <!-- Replace "YOUR_API_KEY" with your actual Google Maps API key -->
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap"></script>
+</body>
+</html>
