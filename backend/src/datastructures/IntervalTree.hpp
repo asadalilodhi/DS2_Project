@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <memory>
-#include "TrafficData.hpp" // make sure this defines TrafficInterval + CongestionLevel
+#include "TrafficData.hpp" 
 
 class IntervalTree {
 private:

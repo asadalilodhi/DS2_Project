@@ -121,27 +121,34 @@
       );
     }
     
-    // Example function to fetch congestion data from backend API
-    // This should be replaced with an actual API call
+    //API function call
     function fetchCongestionData() {
       const congestionList = document.getElementById('congestionList');
       congestionList.innerHTML = "";
 
-      // Sample data – replace with a fetch() or AJAX call to your backend API
-      const sampleData = [
-        {start: '08:00', end: '08:30', description: 'High congestion near Stadium'},
-        {start: '09:00', end: '09:15', description: 'Moderate congestion at Main Road'},
-      ];
-      
-      sampleData.forEach(interval => {
-        const li = document.createElement('li');
-        li.textContent = `${interval.start} - ${interval.end}: ${interval.description}`;
-        congestionList.appendChild(li);
-      });
+      fetch('http://localhost:8000/api/congestion')
+        .then(response => {
+          console.log('Response:', response);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Data:', data);
+          data.forEach(interval => {
+            const li = document.createElement('li');
+            li.textContent = `${interval.start} - ${interval.end}: ${interval.description}`;
+            congestionList.appendChild(li);
+          });
+        })
+        .catch(error => console.error('Error fetching congestion data:', error));
     }
+
+
   </script>
   <script 
-    async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDMn94mxN4gI2bUf-FMLlMpV0CRCWjJD-Y&callback=initMap">
+    async defer src=>
   </script>
 </body>
 </html>
