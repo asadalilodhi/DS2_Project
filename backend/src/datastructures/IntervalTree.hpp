@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include "TrafficData.hpp" 
+#include <string>
 
 class IntervalTree {
 private:
